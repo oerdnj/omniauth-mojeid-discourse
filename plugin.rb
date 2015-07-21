@@ -1,18 +1,18 @@
-# name: omniauth-mindvalley-discourse
-# about: Authenticate with discourse with Mindvalley
+# name: omniauth-mojeid-discourse
+# about: Authenticate with discourse with mojeID
 # version: 0.1.0
 # author: parasquid
+# modified for mojeID by: oerdnj
 
-gem 'omniauth-mindvalley'
+gem 'omniauth-mojeid'
 
+class mojeIDAuthenticator < ::Auth::Authenticator
 
-class MindvalleyAuthenticator < ::Auth::Authenticator
-
-  CLIENT_ID = '1111111'
-  CLIENT_SECRET = 'AUSTRALIASNAKESALAD'
+  CLIENT_ID = ''
+  CLIENT_SECRET = ''
 
   def name
-    'mindvalley'
+    'mojeid'
   end
 
   def after_authenticate(auth_token)
@@ -21,11 +21,11 @@ class MindvalleyAuthenticator < ::Auth::Authenticator
     # grap the info we need from omni auth
     data = auth_token[:info]
     name = data["first_name"]
-    mv_uid = auth_token["uid"]
+    mojeID_uid = auth_token["uid"]
     email = data['email']
 
     # plugin specific data storage
-    current_info = ::PluginStore.get("mv", "mv_uid_#{mv_uid}")
+    current_info = ::PluginStore.get("mojeID", "mojeID_uid_#{mojeID_uid}")
 
     result.user =
       if current_info
@@ -33,7 +33,7 @@ class MindvalleyAuthenticator < ::Auth::Authenticator
       end
 
     result.name = name
-    result.extra_data = { mv_uid: mv_uid }
+    result.extra_data = { mojeID_uid: mojeID_uid }
     result.email = email
 
     result
@@ -41,33 +41,33 @@ class MindvalleyAuthenticator < ::Auth::Authenticator
 
   def after_create_account(user, auth)
     data = auth[:extra_data]
-    ::PluginStore.set("mv", "mv_uid_#{data[:mv_uid]}", {user_id: user.id })
+    ::PluginStore.set("mojeID", "mojeID_uid_#{data[:mojeID_uid]}", {user_id: user.id })
   end
 
   def register_middleware(omniauth)
-    omniauth.provider :mindvalley,
+    omniauth.provider :mojeid,
      CLIENT_ID,
      CLIENT_SECRET
   end
 end
 
 
-auth_provider :title => 'with Mindvalley Accounts',
-    :message => 'Log in via Mindvalley Accounts (Make sure pop up blockers are not enabled).',
+auth_provider :title => 'with mojeID Account',
+    :message => 'Log in via mojeID Account (Make sure pop up blockers are not enabled).',
     :frame_width => 920,
     :frame_height => 800,
-    :authenticator => MindvalleyAuthenticator.new
+    :authenticator => mojeIDAuthenticator.new
 
 
 # We ship with zocial, it may have an icon you like http://zocial.smcllns.com/sample.html
 #  in our current case we have an icon for vk
 register_css <<CSS
 
-.btn-social.vkontakte {
+.btn-social.mojeID {
   background: #46698f;
 }
 
-.btn-social.vkontakte:before {
+.btn-social.mojeID:before {
   content: "N";
 }
 
